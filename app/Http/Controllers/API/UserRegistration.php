@@ -11,11 +11,6 @@ class UserRegistration extends Controller
 {
     public function register(RegisterRequest $request)
     {
-//        $validatedData = $request->validate([
-//            'email' => 'email|required',
-//            'password' => 'required|required_with:confirmPassword|same:confirmPassword',
-//            'confirmPassword' => 'required',
-//        ]);
         $data = $request->only(['password', 'email', 'name']);
 
         $data['password'] = bcrypt($request->password);
