@@ -21,8 +21,6 @@ class UserRegistration extends Controller
     {
         $data = $request->only(['password', 'email', 'name']);
 
-        $data['password'] = bcrypt($request->password);
-
         $user = $this->userService->createUser($data);
 
         $accessToken = $user->createToken('authToken')->accessToken;
