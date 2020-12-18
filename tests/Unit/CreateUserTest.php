@@ -4,6 +4,7 @@ namespace Tests\Unit;
 
 use App\services\UserService;
 use PHPUnit\Framework\TestCase;
+use App\Models\User;
 
 class CreateUserTest extends \Tests\TestCase
 {
@@ -24,12 +25,12 @@ class CreateUserTest extends \Tests\TestCase
     {
         $data = [
             'name' => 'Steve',
-            'email' => 'coolmail@mail.com',
+            'email' => 'coolmail61@mail.com',
             'password' => 'qwerty',
         ];
 
         $createdUser = $this->service->createUser($data);
-        $this->assertInstanceOf(UserService::class, new UserService());
-        $this->assertDatabaseHas('users', ['email' => $data['email'], 'name' => $data['name'], 'password' => $data['password']]);
+        $this->assertInstanceOf(User::class, $createdUser);
+        $this->assertDatabaseHas('users', ['name'=>$data['name'], 'email'=>$data['email']]);
     }
 }
