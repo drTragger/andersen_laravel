@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NewPasswordRequest;
+use App\Http\Requests\PasswordResetRequest;
+use App\Mail\ResetPassword;
 use App\Models\User;
 use App\services\UserService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserRegistration extends Controller
 {
@@ -46,5 +51,37 @@ class UserRegistration extends Controller
         } else {
             return response(['message' => 'User does not exist'], 422);
         }
+    }
+
+    public function resetPassword(PasswordResetRequest $request)
+    {
+        $email = $request->all();
+        $user = $this->userService->getUserByEmail($email['email']);
+
+        if ($user) {
+            $passwordResetData = $this->userService->generatePasswordResetToken($user->id);
+            Mail::to($user->email)->send(new ResetPassword($passwordResetData->token));
+            return response(['message' => 'Password reset code was sent to ' . $user->email]);
+        }
+        return response(['message' => 'User does not exist'], 422);
+    }
+
+    public function setNewPassword(NewPasswordRequest $request)
+    {
+        $tokenData = $this->userService->getTokenData($request->token);
+        if ($tokenData) {
+            $startTime = Carbon::parse($tokenData->updated_at);
+            $finishTime = Carbon::parse(Carbon::now());
+            $totalDuration = $finishTime->diffinSeconds($startTime);
+            if ($totalDuration / 60 >= 120) {
+                $user = $this->userService->getUserById($tokenData->user_id);
+                $this->userService->updatePassword($user, $request->password);
+                if ($this->userService->removeToken($request->token)) {
+                    return response(['message' => 'Password reset successfully']);
+                }
+            }
+            return response(['message' => 'You will be able to reset your password in 2 hours after you last updated it'], 403);
+        }
+        return response(['message' => 'Wrong password reset code'], 422);
     }
 }
