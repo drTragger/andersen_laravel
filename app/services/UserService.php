@@ -16,11 +16,11 @@ class UserService
     }
 
     /**
-     * @param array $data
+     * @param string $email
      * @return mixed
      */
-    public function checkUser(array $data)
+    public function getUserByEmail(string $email)
     {
-        return User::where(['email' => $data['email'], 'name' => $data['name']])->first();
+        return User::where('email', $email)->first();
     }
 }
