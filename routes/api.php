@@ -20,3 +20,5 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::post('/users', [UserRegistration::class, 'register']);
+
+Route::post('/login', [UserRegistration::class, 'login']);
