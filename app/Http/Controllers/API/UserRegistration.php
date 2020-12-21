@@ -34,7 +34,7 @@ class UserRegistration extends Controller
     {
         $data = $request->all();
 
-        $user = $this->userService->checkUser($data);
+        $user = $this->userService->getUserByEmail($data['email']);
 
         if ($user) {
             if (Hash::check($request->password, $user->password)) {

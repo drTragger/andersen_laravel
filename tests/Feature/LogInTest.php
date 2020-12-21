@@ -16,7 +16,6 @@ class LogInTest extends TestCase
     public function testLogIn()
     {
         $data = [
-            'name' => 'john',
             'email' => 'email10@example.com',
             'password' => '1m2i3s4h5a',
         ];

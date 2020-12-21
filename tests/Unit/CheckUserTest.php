@@ -24,13 +24,11 @@ class CheckUserTest extends TestCase
     public function testCheckUser()
     {
         $data = [
-            'name' => 'john',
             'email' => 'email10@example.com',
-            'password' => '1m2i3s4h5a',
         ];
 
-        $response = $this->service->checkUser($data);
+        $response = $this->service->getUserByEmail($data['email']);
         $this->assertInstanceOf(User::class, $response);
-        $this->assertDatabaseHas('users', ['name'=>$data['name'], 'email'=>$data['email']]);
+        $this->assertDatabaseHas('users', ['email' => $data['email']]);
     }
 }
