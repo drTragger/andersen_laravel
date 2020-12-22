@@ -55,8 +55,8 @@ class UserRegistration extends Controller
 
     public function resetPassword(PasswordResetRequest $request)
     {
-        $email = $request->all();
-        $user = $this->userService->getUserByEmail($email['email']);
+        $data = $request->all();
+        $user = $this->userService->getUserByEmail($data['email']);
 
         if ($user) {
             $passwordResetData = $this->userService->generatePasswordResetToken($user->id);
