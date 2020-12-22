@@ -13,14 +13,25 @@ class ResetPasswordTest extends TestCase
      *
      * @return void
      */
-    public function testExample()
+    public function testGetToken()
     {
         $data = [
-            'token' => 'NHU4Ej9OOK',
+            'email' => 'email@example.com',
+        ];
+
+        $response = $this->json('POST', '/api/password-reset', $data)->assertStatus(200);
+        $response->assertJsonStructure(['message'], $response->original);
+    }
+
+    public function testSetNewPassword()
+    {
+        $data = [
+            'token' => 'rfUq071qsK',
             'password' => 'qwerty',
             'confirmPassword' => 'qwerty',
         ];
 
         $response = $this->json('POST', '/api/new-password', $data)->assertStatus(200);
+        $response->assertJsonStructure(['message'], $response->original);
     }
 }
