@@ -68,20 +68,14 @@ class UserRegistration extends Controller
 
     public function setNewPassword(NewPasswordRequest $request)
     {
-        $tokenData = $this->userService->getTokenData($request->token);
-        if ($tokenData) {
-            $startTime = Carbon::parse($tokenData->updated_at);
-            $finishTime = Carbon::parse(Carbon::now());
-            $totalDuration = $finishTime->diffinSeconds($startTime);
-            if ($totalDuration / 60 >= 120) {
-                $user = $this->userService->getUserById($tokenData->user_id);
-                $this->userService->updatePassword($user, $request->password);
-                if ($this->userService->removeToken($request->token)) {
-                    return response(['message' => 'Password reset successfully']);
-                }
+        $token = $request->token;
+        $password = $request->password;
+        if (isset($token)) {
+            if ($password === $request->confirmPassword) {
+                return $this->userService->resetPassword($token, $password);
             }
-            return response(['message' => 'You will be able to reset your password in 2 hours after you last updated it'], 403);
+            return response(['message' => 'Passwords are not similar'], 406);
         }
-        return response(['message' => 'Wrong password reset code'], 422);
+        return response(['message' => 'Please, enter the token'], 406);
     }
 }

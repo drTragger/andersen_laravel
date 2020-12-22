@@ -6,6 +6,7 @@ namespace App\services;
 
 use App\Models\ResetPassword;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 
 class UserService
@@ -34,24 +35,22 @@ class UserService
         return ResetPassword::create($data);
     }
 
-    public function getTokenData(string $token)
+    public function resetPassword(string $token, string $password)
     {
-        return ResetPassword::where('token', $token)->first();
-    }
-
-    public function getUserById(int $id)
-    {
-        return User::where('id', $id)->first();
-    }
-
-    public function updatePassword(User $user, string $password)
-    {
-        $user->password = bcrypt($password);
-        $user->update();
-    }
-
-    public function removeToken(string $token)
-    {
-        return ResetPassword::where('token', $token)->delete();
+        $resetPasswordData = ResetPassword::where('token', $token)->first();
+        if (isset($resetPasswordData)) {
+            $start = Carbon::parse($resetPasswordData->updated_at);
+            $finish = Carbon::parse(Carbon::now());
+            $duration = $finish->diffInSeconds($start);
+            if ($duration / 60 >= 120) {
+                $user = User::where('id', $resetPasswordData->user_id)->first();
+                $user->password = $password;
+                $user->update();
+                ResetPassword::where('token', $token)->first()->delete();
+                return response(['message' => 'Password reset successfully']);
+            }
+            return response(['message' => 'You can reset password in 2 hours after last update'], 425);
+        }
+        return response(['message' => 'Wrong token'], 418);
     }
 }
