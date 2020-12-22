@@ -24,9 +24,14 @@ class NewPasswordRequest extends FormRequest
     public function rules()
     {
         return [
-            'token' => 'exists:reset_password,token',
+            'token' => 'required|exists:reset_password,token',
             'password' => 'required|required_with:confirmPassword|same:confirmPassword',
             'confirmPassword' => 'required',
         ];
+    }
+
+    protected function failedValidation($validator)
+    {
+        return response('Failed', 422);
     }
 }

@@ -27,4 +27,9 @@ class PasswordResetRequest extends FormRequest
             'email' => 'email|required',
         ];
     }
+
+    protected function failedValidation($validator)
+    {
+        return response('Failed', 422);
+    }
 }
