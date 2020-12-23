@@ -74,14 +74,18 @@ class UserRegistration extends Controller
         $token = $request->token;
         $password = $request->password;
         $status = $this->userService->resetPassword($token, $password);
-        return ($status) ? response(['message' => 'Password reset successfully']) : response(['message' => 'This token is no longer available'], 408);
+        return ($status)
+            ? response(['message' => 'Password reset successfully'])
+            : response(['message' => 'This token is no longer available'], 408);
     }
 
     public function updateUserData(UpdateDataRequest $request)
     {
         if (Gate::allows('update', $request->user())) {
             $status = $this->userService->updateUserData($request->toArray(), $request->id);
-            return ($status) ? response(['message' => 'User data updated successfully']) : response(['message' => 'Something went wrong'], 500);
+            return ($status)
+                ? response(['message' => 'User data updated successfully'])
+                : response(['message' => 'Something went wrong'], 422);
         }
     }
 }
