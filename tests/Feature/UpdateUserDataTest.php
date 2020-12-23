@@ -7,6 +7,7 @@ use App\services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Artisan;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
 class UpdateUserDataTest extends TestCase
@@ -33,8 +34,9 @@ class UpdateUserDataTest extends TestCase
 
         $data = User::factory()->make()->only('name', 'email');
 
-        $response = $this->withHeader('Authorization', 'Bearer ' . $token)
-            ->json('PUT', '/api/users/' . $userData->id, $data)
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', '/api/users/' . $userData->id, $data)
             ->assertStatus(200);
 
         $response->assertJsonStructure(['name', 'email'], $data);
