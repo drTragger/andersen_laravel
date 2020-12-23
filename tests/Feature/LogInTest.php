@@ -2,25 +2,33 @@
 
 namespace Tests\Feature;
 
+use App\Models\User;
+use App\services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
-class LogInTest extends TestCase
+class LogInTest extends \Tests\TestCase
 {
+    protected $service;
+
+    public function setUp(): void
+    {
+        parent::setUp();
+        $this->service = app()->make(UserService::class);
+    }
+
     /**
-     * A basic feature test example.
-     *
-     * @return void
+     * @test
      */
     public function testLogIn()
     {
-        $data = [
-            'email' => 'email10@example.com',
-            'password' => '1m2i3s4h5a',
-        ];
+        Artisan::call('passport:install', ['-vvv' => true]);
+        $user = User::factory()->make();
+        $this->service->createUser($user->attributesToArray());
 
-        $response = $this->json('POST', '/api/login', $data)->assertStatus(202);
+        $response = $this->json('POST', '/api/login', $user->only('email', 'password'))->assertStatus(202);
         $response->assertJsonStructure(['access_token'], $response->original);
     }
 }

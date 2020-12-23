@@ -17,20 +17,14 @@ class CreateUserTest extends \Tests\TestCase
     }
 
     /**
-     * A basic unit test example.
-     *
-     * @return void
+     * @test
      */
     public function testCreateUser()
     {
-        $data = [
-            'name' => 'Steve',
-            'email' => 'coolmail61@mail.com',
-            'password' => 'qwerty',
-        ];
+        $user = User::factory()->make()->attributesToArray();
 
-        $createdUser = $this->service->createUser($data);
+        $createdUser = $this->service->createUser($user);
         $this->assertInstanceOf(User::class, $createdUser);
-        $this->assertDatabaseHas('users', ['name'=>$data['name'], 'email'=>$data['email']]);
+        $this->assertDatabaseHas('users', ['name'=>$user['name'], 'email'=>$user['email']]);
     }
 }

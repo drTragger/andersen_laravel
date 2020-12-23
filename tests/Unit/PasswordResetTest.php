@@ -5,6 +5,7 @@ namespace Tests\Unit;
 use App\Models\ResetPassword;
 use App\Models\User;
 use App\services\UserService;
+use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Framework\TestCase;
 
 class PasswordResetTest extends \Tests\TestCase
@@ -16,35 +17,45 @@ class PasswordResetTest extends \Tests\TestCase
         parent::setUp();
         $this->service = app()->make(UserService::class);
     }
+
+
     /**
-     * A basic unit test example.
-     *
-     * @return void
+     * @test
      */
     public function testGetUserByEmail()
     {
-        $email = 'email@example.com';
+        $user = User::factory()->make();
+        $this->service->createUser($user->attributesToArray());
 
-        $user = $this->service->getUserByEmail($email);
+        $user = $this->service->getUserByEmail($user->email);
         $this->assertInstanceOf(User::class, $user);
-        $this->assertDatabaseHas('users', ['email' => $email]);
+        $this->assertDatabaseHas('users', ['email' => $user->email]);
     }
 
+    /**
+     * @test
+     */
     public function testGeneratePasswordResetToken()
     {
-        $userId = 1;
+        $user = User::factory()->make();
+        $userData = $this->service->createUser($user->attributesToArray());
 
-        $result = $this->service->generatePasswordResetToken($userId);
+        $result = $this->service->generatePasswordResetToken($userData->id);
         $this->assertInstanceOf(ResetPassword::class, $result);
-        $this->assertDatabaseHas('reset_password', ['user_id' => $userId, 'token' => $result->token]);
+        $this->assertDatabaseHas('reset_password', ['user_id' => $userData->id, 'token' => $result->token]);
     }
 
+    /**
+     * @test
+     */
     public function testResetPassword()
     {
-        $token = 'MlNGkWa99m';
-        $password = 'qwerty';
+        $user = User::factory()->make();
+        $userData = $this->service->createUser($user->attributesToArray());
 
-        $this->service->resetPassword($token, $password);
-        $this->assertDatabaseMissing('reset_password', ['token' => $token]);
+        $result = $this->service->generatePasswordResetToken($userData->id);
+
+        $this->service->resetPassword($result->token, $user->password);
+        $this->assertDatabaseMissing('reset_password', ['token' => $result->token]);
     }
 }
