@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\NewPasswordRequest;
+use App\Http\Requests\PasswordResetRequest;
+use App\Mail\ResetPassword;
 use App\Models\User;
 use App\services\UserService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 
 class UserRegistration extends Controller
 {
@@ -34,7 +39,7 @@ class UserRegistration extends Controller
     {
         $data = $request->all();
 
-        $user = $this->userService->checkUser($data);
+        $user = $this->userService->getUserByEmail($data['email']);
 
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
@@ -46,5 +51,26 @@ class UserRegistration extends Controller
         } else {
             return response(['message' => 'User does not exist'], 422);
         }
+    }
+
+    public function resetPassword(PasswordResetRequest $request)
+    {
+        $data = $request->all();
+        $user = $this->userService->getUserByEmail($data['email']);
+
+        if ($user) {
+            $passwordResetData = $this->userService->generatePasswordResetToken($user->id);
+            Mail::to($user->email)->send(new ResetPassword($passwordResetData->token));
+            return response(['message' => 'Password reset code was sent to ' . $user->email]);
+        }
+        return response(['message' => 'User does not exist'], 422);
+    }
+
+    public function setNewPassword(NewPasswordRequest $request)
+    {
+        $token = $request->token;
+        $password = $request->password;
+        $status = $this->userService->resetPassword($token, $password);
+        return ($status) ? response(['message' => 'Password reset successfully']) : response(['message' => 'This token is no longer available'], 408);
     }
 }
