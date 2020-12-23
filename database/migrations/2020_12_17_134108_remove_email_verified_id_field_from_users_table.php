@@ -15,6 +15,8 @@ class RemoveEmailVerifiedIdFieldFromUsersTable extends Migration
     {
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('email_verified_at');
+        });
+        Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('remember_token');
         });
     }
