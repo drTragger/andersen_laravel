@@ -5,13 +5,16 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NewPasswordRequest;
 use App\Http\Requests\PasswordResetRequest;
+use App\Http\Requests\UpdateDataRequest;
 use App\Mail\ResetPassword;
 use App\Models\User;
 use App\services\UserService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -43,7 +46,7 @@ class UserRegistration extends Controller
 
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $token = $user->createToken('LogIn')->accessToken;
+                $token = $user->createToken('authToken')->accessToken;
                 return response(['access_token' => $token], 202);
             } else {
                 return response(['message' => 'Wrong password'], 422);
@@ -72,5 +75,13 @@ class UserRegistration extends Controller
         $password = $request->password;
         $status = $this->userService->resetPassword($token, $password);
         return ($status) ? response(['message' => 'Password reset successfully']) : response(['message' => 'This token is no longer available'], 408);
+    }
+
+    public function updateUserData(UpdateDataRequest $request)
+    {
+        if (Gate::allows('update', $request->user())) {
+            $status = $this->userService->updateUserData($request->toArray(), $request->id);
+            return ($status) ? response(['message' => 'User data updated successfully']) : response(['message' => 'Something went wrong'], 500);
+        }
     }
 }
