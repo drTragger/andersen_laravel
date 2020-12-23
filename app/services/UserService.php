@@ -68,4 +68,12 @@ class UserService
         ResetPassword::where('token', $token)->first()->delete();
         return false;
     }
+
+    public function updateUserData(array $newData, int $userId)
+    {
+        $user = User::where('id', $userId)->first();
+        $user->name = $newData['name'];
+        $user->email = $newData['email'];
+        return $user->update();
+    }
 }
