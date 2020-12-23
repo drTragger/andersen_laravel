@@ -29,9 +29,4 @@ class NewPasswordRequest extends FormRequest
             'confirmPassword' => 'required',
         ];
     }
-
-    protected function failedValidation($validator)
-    {
-        return response('Failed', 422);
-    }
 }

@@ -7,11 +7,19 @@ namespace App\services;
 use App\Models\ResetPassword;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use phpDocumentor\Reflection\Types\Boolean;
 
 class UserService
 {
-    public function createUser(array $data)
+    /**
+     * @param array $data
+     * @return User
+     */
+    public function createUser(array $data): User
     {
         $data['password'] = bcrypt($data['password']);
         return User::create($data);
@@ -19,14 +27,18 @@ class UserService
 
     /**
      * @param string $email
-     * @return mixed
+     * @return User
      */
-    public function getUserByEmail(string $email)
+    public function getUserByEmail(string $email): User
     {
         return User::where('email', $email)->first();
     }
 
-    public function generatePasswordResetToken(int $userId)
+    /**
+     * @param int $userId
+     * @return ResetPassword
+     */
+    public function generatePasswordResetToken(int $userId): ResetPassword
     {
         $data = [
             'token' => str_random(10),
@@ -35,22 +47,25 @@ class UserService
         return ResetPassword::create($data);
     }
 
-    public function resetPassword(string $token, string $password)
+    /**
+     * @param string $token
+     * @param string $password
+     * @return bool
+     */
+    public function resetPassword(string $token, string $password): bool
     {
         $resetPasswordData = ResetPassword::where('token', $token)->first();
-        if (isset($resetPasswordData)) {
-            $start = Carbon::parse($resetPasswordData->updated_at);
-            $finish = Carbon::parse(Carbon::now());
-            $duration = $finish->diffInSeconds($start);
-            if ($duration / 60 >= 120) {
-                $user = User::where('id', $resetPasswordData->user_id)->first();
-                $user->password = $password;
-                $user->update();
-                ResetPassword::where('token', $token)->first()->delete();
-                return response(['message' => 'Password reset successfully']);
-            }
-            return response(['message' => 'You can reset password in 2 hours after last update'], 425);
+        $start = Carbon::parse($resetPasswordData->updated_at);
+        $finish = Carbon::parse(Carbon::now());
+        $duration = $finish->diffInSeconds($start);
+        if ($duration / 60 <= 120) {
+            $user = User::where('id', $resetPasswordData->user_id)->first();
+            $user->password = bcrypt($password);
+            $user->update();
+            ResetPassword::where('token', $token)->first()->delete();
+            return true;
         }
-        return response(['message' => 'Wrong token'], 418);
+        ResetPassword::where('token', $token)->first()->delete();
+        return false;
     }
 }

@@ -70,12 +70,7 @@ class UserRegistration extends Controller
     {
         $token = $request->token;
         $password = $request->password;
-        if (isset($token)) {
-            if ($password === $request->confirmPassword) {
-                return $this->userService->resetPassword($token, $password);
-            }
-            return response(['message' => 'Passwords are not similar'], 406);
-        }
-        return response(['message' => 'Please, enter the token'], 406);
+        $status = $this->userService->resetPassword($token, $password);
+        return ($status) ? response(['message' => 'Password reset successfully']) : response(['message' => 'This token is no longer available'], 408);
     }
 }
