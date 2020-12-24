@@ -27,25 +27,28 @@ class GetUsersTest extends TestCase
     {
         Artisan::call('passport:install', ['-vvv' => true]);
 
-        $user = User::factory()->make()->attributesToArray();
-        $this->service->createUser($user);
+        $user = User::factory()->create();
+
+        Passport::actingAs($user);
+
+        for ($i = 0; $i < 10; $i++) {
+            User::factory()->create();
+        }
 
         $response = $this->get('/api/users')->assertStatus(200);
         $response->assertJsonStructure(['users'], $response->original);
+        $this->assertCount(11, $response->original['users']);
     }
 
     public function testGetUser()
     {
         Artisan::call('passport:install', ['-vvv' => true]);
 
-        $user = User::factory()->make();
-        $userData = $this->service->createUser($user->attributesToArray());
+        $user = User::factory()->create();
 
-        $userData->createToken('authToken')->accessToken;
+        Passport::actingAs($user);
 
-        Passport::actingAs($userData);
-
-        $response = $this->get('/api/users/' . $userData->id)->assertStatus(200);
+        $response = $this->get('/api/users/' . $user->id)->assertStatus(200);
         $response->assertJsonStructure(['user'], $response->original);
     }
 }
