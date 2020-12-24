@@ -26,3 +26,9 @@ Route::post('/login', [UserRegistration::class, 'login']);
 Route::post('/password-reset', [UserRegistration::class, 'resetPassword']);
 
 Route::post('/new-password', [UserRegistration::class, 'setNewPassword']);
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::put('/users/{id}', [UserRegistration::class, 'updateUserData']);
+    Route::get('/users/{id}', [UserRegistration::class, 'getUser']);
+    Route::get('/users', [UserRegistration::class, 'getUsers']);
+});

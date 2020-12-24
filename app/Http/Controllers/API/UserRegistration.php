@@ -5,15 +5,19 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\NewPasswordRequest;
 use App\Http\Requests\PasswordResetRequest;
+use App\Http\Requests\UpdateDataRequest;
 use App\Mail\ResetPassword;
 use App\Models\User;
 use App\services\UserService;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
 use App\Http\Requests\LoginRequest;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Resources\User as UserResource;
 
 class UserRegistration extends Controller
 {
@@ -43,7 +47,7 @@ class UserRegistration extends Controller
 
         if ($user) {
             if (Hash::check($request->password, $user->password)) {
-                $token = $user->createToken('LogIn')->accessToken;
+                $token = $user->createToken('authToken')->accessToken;
                 return response(['access_token' => $token], 202);
             } else {
                 return response(['message' => 'Wrong password'], 422);
@@ -71,6 +75,40 @@ class UserRegistration extends Controller
         $token = $request->token;
         $password = $request->password;
         $status = $this->userService->resetPassword($token, $password);
-        return ($status) ? response(['message' => 'Password reset successfully']) : response(['message' => 'This token is no longer available'], 408);
+        return ($status)
+            ? response(['message' => 'Password reset successfully'])
+            : response(['message' => 'This token is no longer available'], 408);
     }
+
+    public function updateUserData(UpdateDataRequest $request)
+    {
+        if (Gate::allows('update', $request->user())) {
+            $status = $this->userService->updateUserData($request->toArray(), $request->id);
+            return ($status)
+                ? response(['message' => 'User data updated successfully'])
+                : response(['message' => 'Something went wrong'], 422);
+        }
+        return response(['message' => 'You are not allowed to do this'], 403);
+    }
+
+    public function getUsers(Request $response)
+    {
+        if (Gate::allows('get_users', $response->user())) {
+            $emails = $this->userService->getUsers();
+            return response(['users' => $emails]);
+        }
+        return response(['message' => 'You are not allowed to do this'], 403);
+    }
+
+    public function getUser($userId)
+    {
+        if ($this->userService->getUserById($userId)) {
+            if (Gate::allows('get_user', (int)$userId)) {
+                return response(['user' => new UserResource(User::find($userId))]);
+            }
+            return response(['message' => 'You are not allowed to do this'], 403);
+        }
+        return response(['message' => 'User does not exist'], 404);
+    }
+
 }
