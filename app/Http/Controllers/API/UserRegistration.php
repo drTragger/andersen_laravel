@@ -91,10 +91,13 @@ class UserRegistration extends Controller
         return response(['message' => 'You are not allowed to do this'], 403);
     }
 
-    public function getUsers()
+    public function getUsers(Request $response)
     {
-        $emails = $this->userService->getUsers();
-        return response(['users' => $emails]);
+        if (Gate::allows('get_users', $response->user())) {
+            $emails = $this->userService->getUsers();
+            return response(['users' => $emails]);
+        }
+        return response(['message' => 'You are not allowed to do this'], 403);
     }
 
     public function getUser($userId)
