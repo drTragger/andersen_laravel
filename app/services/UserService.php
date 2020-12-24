@@ -7,6 +7,7 @@ namespace App\services;
 use App\Models\ResetPassword;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
@@ -69,11 +70,31 @@ class UserService
         return false;
     }
 
+    /**
+     * @param array $newData
+     * @param int $userId
+     * @return mixed
+     */
     public function updateUserData(array $newData, int $userId)
     {
         $user = User::where('id', $userId)->first();
         $user->name = $newData['name'];
         $user->email = $newData['email'];
         return $user->update();
+    }
+
+    /**
+     * @return array
+     */
+    public function getUsers(): array
+    {
+        $users = User::all();
+        $plucked = $users->pluck('email');
+        return $plucked->all();
+    }
+
+    public function getUserById(int $id)
+    {
+        return User::where('id', '=', $id)->first();
     }
 }

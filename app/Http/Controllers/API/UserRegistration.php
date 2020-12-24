@@ -17,6 +17,7 @@ use App\Http\Requests\LoginRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use App\Http\Resources\User as UserResource;
 
 class UserRegistration extends Controller
 {
@@ -87,5 +88,24 @@ class UserRegistration extends Controller
                 ? response(['message' => 'User data updated successfully'])
                 : response(['message' => 'Something went wrong'], 422);
         }
+        return response(['message' => 'You are not allowed to do this'], 403);
     }
+
+    public function getUsers()
+    {
+        $emails = $this->userService->getUsers();
+        return response(['users' => $emails]);
+    }
+
+    public function getUser($userId)
+    {
+        if ($this->userService->getUserById($userId)) {
+            if (Gate::allows('get_user', (int)$userId)) {
+                return response(['user' => new UserResource(User::find($userId))]);
+            }
+            return response(['message' => 'You are not allowed to do this'], 403);
+        }
+        return response(['message' => 'User does not exist'], 404);
+    }
+
 }

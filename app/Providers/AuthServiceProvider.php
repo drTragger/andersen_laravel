@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Http\Requests\UpdateDataRequest;
 use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
@@ -32,6 +31,10 @@ class AuthServiceProvider extends ServiceProvider
 
         Gate::define('update', function (User $user, $request) {
             return $user->id === $request->id;
+        });
+
+        Gate::define('get_user', function (User $user, $id) {
+            return $user->id === $id;
         });
     }
 }
