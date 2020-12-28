@@ -38,7 +38,11 @@ class AuthServiceProvider extends ServiceProvider
         });
 
         Gate::define('get_users', function (User $user, $response){
-            return$user->id === $response->id;
+            return $user->id === $response->id;
+        });
+
+        Gate::define('delete_user', function (User $user, $id){
+            return $user->id === $id;
         });
     }
 }
