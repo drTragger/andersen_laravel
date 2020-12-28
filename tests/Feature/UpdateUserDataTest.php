@@ -7,9 +7,10 @@ use App\services\UserService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Artisan;
+use Laravel\Passport\Passport;
 use Tests\TestCase;
 
-class LogInTest extends \Tests\TestCase
+class UpdateUserDataTest extends TestCase
 {
     protected $service;
 
@@ -22,13 +23,22 @@ class LogInTest extends \Tests\TestCase
     /**
      * @test
      */
-    public function testLogIn()
+    public function testUpdateData()
     {
         Artisan::call('passport:install', ['-vvv' => true]);
-        $user = User::factory()->make();
-        $this->service->createUser($user->attributesToArray());
 
-        $response = $this->json('POST', '/api/login', $user->only('email', 'password'))->assertStatus(202);
-        $response->assertJsonStructure(['access_token'], $response->original);
+        $user = User::factory()->make();
+        $userData = $this->service->createUser($user->attributesToArray());
+
+        $token = $userData->createToken('authToken')->accessToken;
+
+        $data = User::factory()->make()->only('name', 'email');
+
+        Passport::actingAs($user);
+
+        $response = $this->json('PUT', '/api/users/' . $userData->id, $data)
+            ->assertStatus(200);
+
+        $response->assertJsonStructure(['name', 'email'], $data);
     }
 }

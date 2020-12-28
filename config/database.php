@@ -15,7 +15,7 @@ return [
     |
     */
 
-    'default' => env('DB_CONNECTION', 'mysql'),
+    'default' => env('DB_DEFAULT', 'mysql'),
 
     /*
     |--------------------------------------------------------------------------
@@ -90,6 +90,11 @@ return [
             'prefix' => '',
             'prefix_indexes' => true,
         ],
+
+        'sqlite_testing' => [
+            'driver'   => 'sqlite',
+            'database' => ':memory:',
+        ]
 
     ],
 
