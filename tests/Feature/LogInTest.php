@@ -9,7 +9,7 @@ use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Artisan;
 use Tests\TestCase;
 
-class LogInTest extends \Tests\TestCase
+class LogInTest extends TestCase
 {
     protected $service;
 
