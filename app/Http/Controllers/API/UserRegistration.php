@@ -54,15 +54,12 @@ class UserRegistration extends Controller
                 if (Hash::check($request->password, $user->password)) {
                     $token = $user->createToken('authToken')->accessToken;
                     return response(['access_token' => $token], 202);
-                } else {
-                    return response(['message' => 'Wrong password'], 422);
                 }
-            } else {
-                return response(['message' => 'User was deleted'], 422);
+                return response(['message' => 'Wrong password'], 422);
             }
-        } else {
-            return response(['message' => 'User does not exist'], 404);
+            return response(['message' => 'User was deleted'], 422);
         }
+        return response(['message' => 'User does not exist'], 404);
     }
 
     public function resetPassword(PasswordResetRequest $request)
