@@ -4,14 +4,17 @@
 namespace App\services;
 
 
+use App\Mail\DeleteAccount;
 use App\Models\ResetPassword;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use phpDocumentor\Reflection\Types\Boolean;
 
 class UserService
@@ -111,6 +114,13 @@ class UserService
         $user = User::where('id', $userId)->first();
         $user->status = User::INACTIVE;
         $user->update();
+        $data = [
+            'username' => $user->name,
+            'email' => $user->email,
+            'subject' => 'Delete account',
+        ];
+        $pdf = PDF::loadView('pdf.delete', $data);
+        Mail::to($user->email)->send(new DeleteAccount($pdf->output(), $data));
         return $user;
     }
 }

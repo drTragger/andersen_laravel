@@ -25,8 +25,7 @@ class LogInTest extends \Tests\TestCase
     public function testLogIn()
     {
         Artisan::call('passport:install', ['-vvv' => true]);
-        $user = User::factory()->make();
-        $this->service->createUser($user->attributesToArray());
+        $user = User::factory()->create();
 
         $response = $this->json('POST', '/api/login', $user->only('email', 'password'))->assertStatus(202);
         $response->assertJsonStructure(['access_token'], $response->original);

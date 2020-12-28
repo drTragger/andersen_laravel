@@ -50,7 +50,7 @@ class UserRegistration extends Controller
         $user = $this->userService->getUserByEmail($data['email']);
 
         if ($user) {
-            if ($user->status === 1) {
+            if ($user->status === User::ACTIVE) {
                 if (Hash::check($request->password, $user->password)) {
                     $token = $user->createToken('authToken')->accessToken;
                     return response(['access_token' => $token], 202);
@@ -125,13 +125,6 @@ class UserRegistration extends Controller
             if (Gate::allows('delete_user', (int)$userId)) {
                 $deletedUser = $this->userService->deleteUser($userId);
                 if ($deletedUser->status === User::INACTIVE) {
-                    $data = [
-                        'username' => $deletedUser->name,
-                        'email' => $deletedUser->email,
-                        'subject' => 'Delete account',
-                    ];
-                    $pdf = PDF::loadView('pdf.delete', $data);
-                    Mail::to($deletedUser->email)->send(new DeleteAccount($pdf->output(), $data));
                     return response(['message' => 'Account was deleted']);
                 }
                 return response(['message' => 'Could not delete this user'], 422);
