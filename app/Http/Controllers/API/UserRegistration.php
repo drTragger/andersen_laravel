@@ -6,10 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\NewPasswordRequest;
 use App\Http\Requests\PasswordResetRequest;
 use App\Http\Requests\UpdateDataRequest;
+use App\Mail\DeleteAccount;
 use App\Mail\ResetPassword;
 use App\Models\User;
 use App\services\UserService;
+use Barryvdh\DomPDF\Facade as PDF;
+use Barryvdh\DomPDF\ServiceProvider;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 use App\Http\Requests\RegisterRequest;
@@ -45,15 +49,19 @@ class UserRegistration extends Controller
 
         $user = $this->userService->getUserByEmail($data['email']);
 
-        if ($user) {
-            if (Hash::check($request->password, $user->password)) {
-                $token = $user->createToken('authToken')->accessToken;
-                return response(['access_token' => $token], 202);
+        if ($user->exists) {
+            if ($user->status == User::ACTIVE) {
+                if (Hash::check($request->password, $user->password)) {
+                    $token = $user->createToken('authToken')->accessToken;
+                    return response(['access_token' => $token], 202);
+                } else {
+                    return response(['message' => 'Wrong password'], 422);
+                }
             } else {
-                return response(['message' => 'Wrong password'], 422);
+                return response(['message' => 'User was deleted'], 422);
             }
         } else {
-            return response(['message' => 'User does not exist'], 422);
+            return response(['message' => 'User does not exist'], 404);
         }
     }
 
@@ -111,4 +119,18 @@ class UserRegistration extends Controller
         return response(['message' => 'User does not exist'], 404);
     }
 
+    public function deleteUser($userId)
+    {
+        if ($this->userService->getUserById($userId)) {
+            if (Gate::allows('delete_user', (int)$userId)) {
+                $deletedUser = $this->userService->deleteUser($userId);
+                if ($deletedUser->status === User::INACTIVE) {
+                    return response(['message' => 'Account was deleted']);
+                }
+                return response(['message' => 'Could not delete this user'], 422);
+            }
+            return response(['message' => 'You are not allowed to do this'], 403);
+        }
+        return response(['message' => 'User does not exist'], 404);
+    }
 }
