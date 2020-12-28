@@ -49,8 +49,8 @@ class UserRegistration extends Controller
 
         $user = $this->userService->getUserByEmail($data['email']);
 
-        if ($user) {
-            if ($user->status === User::ACTIVE) {
+        if ($user->exists) {
+            if ($user->status == User::ACTIVE) {
                 if (Hash::check($request->password, $user->password)) {
                     $token = $user->createToken('authToken')->accessToken;
                     return response(['access_token' => $token], 202);
