@@ -41,23 +41,16 @@ class SendComments extends Command
      */
     public function handle()
     {
-//        $data = DB::table('comments')->join('users', 'comments.user_id', '=', 'users.id')->get(); // Getting users and comments using join
-        $data = Comment::with('user')->get(); // Getting users and comments using Laravel relations
+//        $data = User::join('comments', 'comments.user_id', '=', 'users.id')->get(); // Getting users and comments using join
+        $data = User::with('comments')->get(); // Getting users and comments using Laravel relations
 
-        foreach ($data as $datum) {
-            if ($datum->user->id === $datum->user_id) {
-                $groupedComments[$datum->user->email][] =  ['text' => $datum->text, 'date' => $datum->created_at];
+        foreach ($data->all() as $datum) {
+            if (!empty($datum->comments->all())) {
+                Mail::to($datum->email)->send(new \App\Mail\SendComments($datum->comments->all()));
             }
         }
 
-        if (isset($groupedComments)) {
-            foreach ($groupedComments as $email => $comments) {
-                Mail::to($email)->send(new \App\Mail\SendComments($comments));
-            }
-            echo "Emails sent successfully\n";
-        } else {
-            echo "No data to send\n";
-        }
+        echo "Emails sent successfully\n";
 
         return 0;
     }
