@@ -9,7 +9,7 @@ use App\Http\Requests\UpdateDataRequest;
 use App\Mail\DeleteAccount;
 use App\Mail\ResetPassword;
 use App\Models\User;
-use App\services\UserService;
+use App\Services\UserService;
 use Barryvdh\DomPDF\Facade as PDF;
 use Barryvdh\DomPDF\ServiceProvider;
 use Carbon\Carbon;

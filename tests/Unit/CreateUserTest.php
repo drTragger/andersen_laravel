@@ -2,7 +2,7 @@
 
 namespace Tests\Unit;
 
-use App\services\UserService;
+use App\Services\UserService;
 use PHPUnit\Framework\TestCase;
 use App\Models\User;
 

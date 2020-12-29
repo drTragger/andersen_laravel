@@ -4,7 +4,7 @@ namespace Tests\Unit;
 
 use App\Models\ResetPassword;
 use App\Models\User;
-use App\services\UserService;
+use App\Services\UserService;
 use Illuminate\Support\Facades\Artisan;
 use PHPUnit\Framework\TestCase;
 

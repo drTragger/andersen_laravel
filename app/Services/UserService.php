@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\services;
+namespace App\Services;
 
 
 use App\Mail\DeleteAccount;
@@ -9,13 +9,7 @@ use App\Models\ResetPassword;
 use App\Models\User;
 use Barryvdh\DomPDF\Facade as PDF;
 use Carbon\Carbon;
-use Illuminate\Support\Collection;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use phpDocumentor\Reflection\Types\Boolean;
 
 class UserService
 {
