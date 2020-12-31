@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\UserRegistration;
+use App\Http\Controllers\API\CommentController;
 
 /*
 |--------------------------------------------------------------------------
@@ -27,9 +28,12 @@ Route::post('/password-reset', [UserRegistration::class, 'resetPassword']);
 
 Route::post('/new-password', [UserRegistration::class, 'setNewPassword']);
 
+
+
 Route::group(['middleware' => 'auth:api'], function () {
     Route::put('/users/{id}', [UserRegistration::class, 'updateUserData']);
     Route::get('/users/{id}', [UserRegistration::class, 'getUser']);
     Route::get('/users', [UserRegistration::class, 'getUsers']);
     Route::delete('/users/{id}', [UserRegistration::class, 'deleteUser']);
+    Route::post('/create', [CommentController::class, 'create']);
 });

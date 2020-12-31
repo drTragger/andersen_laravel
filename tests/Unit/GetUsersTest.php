@@ -3,7 +3,7 @@
 namespace Tests\Unit;
 
 use App\Models\User;
-use App\services\UserService;
+use App\Services\UserService;
 use PHPUnit\Framework\TestCase;
 
 class GetUsersTest extends \Tests\TestCase
