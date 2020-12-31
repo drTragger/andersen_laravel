@@ -38,7 +38,7 @@ class ChangeUserStatus extends Command
      */
     public function handle()
     {
-        $inactiveUsers = User::where('status', '=', User::INACTIVE)->update(['status' => User::ACTIVE]);
+        User::where('status', '=', User::INACTIVE)->update(['status' => User::ACTIVE]);
 
         echo "Statuses were changed successfully\n";
 

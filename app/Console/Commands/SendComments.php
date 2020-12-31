@@ -42,11 +42,11 @@ class SendComments extends Command
     public function handle()
     {
 //        $data = User::join('comments', 'comments.user_id', '=', 'users.id')->get(); // Getting users and comments using join
-        $data = User::with('comments')->get(); // Getting users and comments using Laravel relations
+        $users = User::with('comments')->get(); // Getting users and comments using Laravel relations
 
-        foreach ($data->all() as $datum) {
+        foreach ($users->all() as $user) {
             if (!empty($datum->comments->all())) {
-                Mail::to($datum->email)->send(new \App\Mail\SendComments($datum->comments->all()));
+                Mail::to($user->email)->send(new \App\Mail\SendComments($user->comments->all()));
             }
         }
 
